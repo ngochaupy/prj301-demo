@@ -43,26 +43,32 @@ public class StudentController extends HttpServlet {
             throws ServletException, IOException {
 
             String action = request.getParameter("action");
-            String keyword = request.getParameter("keyword");            
-            if (keyword == null) keyword = "";
-            String sortCol = request.getParameter("colSort");
+            String keyword = request.getParameter("keyword");  
             
+            if (keyword == null) {
+                keyword = "";
+            }
             
-          
-            StudentDAO studentDAO = new StudentDAO();            
+            String sortCol = request.getParameter("colSort");   
+            
+            StudentDAO studentDAO = new StudentDAO();     
+            HttpSession session = request.getSession(false);
+            if (session == null  || session.getAttribute("usersession")== null){
+                response.sendRedirect("login.jsp");
+                return;
+            }            
+            
             if (action == null || action.equals("list")){
                 
-                    
-                StudentDAO dao = new StudentDAO();
-                List<StudentDTO> list = dao.list(keyword, sortCol);
+                
+                List<StudentDTO> list = studentDAO.list(keyword, sortCol);
                 request.setAttribute("studentlist", list);
                 
-                request.getRequestDispatcher("/studentlist.jsp").forward(request, response);
+                request.getRequestDispatcher("studentlist.jsp").forward(request, response);
                 
             }
             
-            else if ( action.equals("details")){
-                
+            else if ( action.equals("details")){               
                 Integer id = null;
                 try{
                     id = Integer.parseInt(request.getParameter("id"));      
@@ -75,48 +81,101 @@ public class StudentController extends HttpServlet {
                     student =  studentDAO.load(id);
                 }
 
-                request.setAttribute("object", student);
+                request.setAttribute("student", student);
                 RequestDispatcher rd = request.getRequestDispatcher("studentdetails.jsp");
                 rd.forward(request, response);
-            }
-            
-            else if ( action.equals("edit")){
+            }else if ( action.equals("edit")){
                 
+               Integer id = null;       
+               try {
+                   id = Integer.parseInt(request.getParameter("id"));
+               } catch (NumberFormatException ex ){
+                   log("Parameter id has wrong format.");
+               }
                
+               
+               
+            StudentDTO student = null;
+            if (id !=null) {
+                student = studentDAO.load(id);
             }
+            request.setAttribute("student", student);
+            request.setAttribute("nextaction", "update");
             
-            else if ( action.equals("create")){
+            RequestDispatcher rd = request.getRequestDispatcher("studentedit.jsp");
+            rd.forward(request, response);
+            } else if ( action.equals("create")){
                 
+                StudentDTO student = new StudentDTO();
+                request.setAttribute("student", student);
+                request.setAttribute("nextaction", "insert");
+                 RequestDispatcher rd = request.getRequestDispatcher("studentedit.jsp");
+                 rd.forward(request, response);
                 
+            } else if (action.equals("update")){
+                 Integer id = null;
+                 try {
+                     id = Integer.parseInt(request.getParameter("id"));
+                    } catch (NumberFormatException ex ){
+                   log("Parameter id has wrong format.");
+               }
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String age = request.getParameter("age");
+            StudentDTO student = null;
+            if (id != null){
+                student = studentDAO.load(id);
             }
+            student.setFirstname(firstName);
+            student.setLastname(lastName);
+            student.setAge(0);
             
+            studentDAO.update(student);
             
-            else if (action.equals("update")){
-                 
-            }
+            request.setAttribute("object", student);
+            RequestDispatcher rd = request.getRequestDispatcher("studentdetails.jsp");
+            rd.forward(request, response);
             
-            else if (action.equals("insert")){
+            }else if (action.equals("insert")){
                  
-                  
-                 
-            }
-            else if (action.equals("delete")){
+                  Integer id = null;
+                  try {
+                      id = Integer.parseInt(request.getParameter("id"));
+                  } catch (NumberFormatException ex ){
+                   log("Parameter id has wrong format.");
+               }
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String age = request.getParameter("age");  
+            StudentDTO student = new StudentDTO();
+            
+            student.setId(id);
+            student.setFirstname(firstName);
+            student.setLastname(lastName);
+            student.setAge(0);
+            
+            studentDAO.insert(student);
+            request.setAttribute("student", student);
+            RequestDispatcher rd = request.getRequestDispatcher("studentdetails.jsp");
+            rd.forward(request, response);
+            }else if (action.equals("delete")){
                 
-                Long id = null;
+                Integer id = null;
                 try{
-                    id = Long.parseLong(request.getParameter("id"));      
+                    id = Integer.parseInt(request.getParameter("id"));      
                 }catch (NumberFormatException ex){
-                    
+                     log("Parameter id has wrong format.");
                 }
                   
+                
                 if (id != null){
                     studentDAO.delete(id);
                 }
 
                 List<StudentDTO> list = studentDAO.list(keyword, sortCol);
                 
-                request.setAttribute("list", list);
-                RequestDispatcher rd = request.getRequestDispatcher("studentlist.jsp");
+                request.setAttribute("studentlist", list);
+                RequestDispatcher rd = request.getRequestDispatcher("/studentlist.jsp");
                 rd.forward(request, response);
             }
         

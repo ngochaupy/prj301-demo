@@ -9,22 +9,30 @@
     <body>
          <jsp:include page="/menu.jsp" flush="true" />
          
-         <h1>Student Details </h1>         
+         <h1>Student Edit </h1>         
          <p> Login user: ${sessionScope.usersession.username}</p>
-                 
+         
+         
+         <form action="StudentController" method="POST">        
          <table>
          
-         <tr><td>Id</td><td>${requestScope.object.id}</td></tr>
-         <tr><td>First name</td><td>${requestScope.object.firstName }</td></tr>
-         <tr><td>Last name</td><td>${requestScope.object.lastName}</td></tr>		 
+            <tr><td>Id</td><td><input name="id" value="${requestScope.student.id}"></td></tr>
+            <tr><td>First name</td><td><input name="firstName" value="${requestScope.student.firstname }"</td></tr>
+            <tr><td>Last name</td><td><input name="lastName" value="${requestScope.student.lastname}"</td></tr>	
+            <tr><td colspan ="2" >
+                    
          
-         </table>
+         
          
         
-         <form action="student">
-             <input type=hidden name="id" value="${requestScope.object.id}">
-             <input type=hidden name="action" value="edit">
-             <input type=submit value="Edit"></form>
+         
+           
+             <input name="action" value=${requestScope.nextacion} type="hidden">
+             <input type=submit value="Save">
+                </td></tr>
+             
+                   
+             </table>
          </form>
         
             
